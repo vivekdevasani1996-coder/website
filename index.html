@@ -1707,32 +1707,9 @@ const swiper = new Swiper(".testiSwiper", {
 /* ─── Initial setup ─── */
 setTimeout(triggerReveals, 100);
 </script>
+<script src="count.js"></script>
 <script>
 // Robust inline news sorter: scans card text for multiple date patterns and sorts newest first
-// Visitor counter: localStorage demo + optional API hook
-document.addEventListener('DOMContentLoaded', function(){
-  const el = document.getElementById('visitor-count');
-  if (!el) return;
-  const VISITOR_API = ''; // set to your endpoint to enable server-side counts (POST to increment, GET to fetch)
-  if (VISITOR_API) {
-    // try POST then GET fallback
-    fetch(VISITOR_API, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({action:'inc'}) })
-      .then(r => r.json()).then(j => { el.textContent = (j.count || j.total || j.visitors || '—'); })
-      .catch(() => {
-        fetch(VISITOR_API).then(r=>r.json()).then(j => { el.textContent = (j.count||j.total||j.visitors||'—'); }).catch(()=>{ el.textContent = '—'; });
-      });
-    return;
-  }
-
-  // local fallback: per-browser visit counter
-  try {
-    const key = 'aviandco_visits_local_v1';
-    let n = parseInt(localStorage.getItem(key) || '0', 10);
-    n = isNaN(n) ? 1 : n + 1;
-    localStorage.setItem(key, String(n));
-    el.textContent = n.toLocaleString();
-  } catch (e) { el.textContent = '—'; }
-});
 function parseDateFromText(text) {
   if (!text) return null;
   text = text.replace(/\u00A0/g, ' ').trim(); // normalize NBSP
