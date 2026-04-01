@@ -775,7 +775,7 @@
         <!-- contact nudge -->
           <div style="margin-top:28px;padding:20px 24px;border-radius:14px;background:rgba(26,188,156,.07);border:1px solid rgba(26,188,156,.18)">
           <div style="font-family:var(--font-ui);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:6px">Have Questions?</div>
-          <div style="font-family:var(--font-body);font-size:13px;color:var(--ink3);line-height:1.65">Reach us at <a href="mailto:info@aviandco.in" style="color:var(--teal);font-weight:600"><span class="__cf_email__" data-cfemail="4e272028210e2f38272f202a2d21602720">info@aviandco.in</span></a> for any career related enquiries.</div>
+          <div style="font-family:var(--font-body);font-size:13px;color:var(--ink3);line-height:1.65">Reach us at <a href="mailto:info@aviandco.in" style="color:var(--teal);font-weight:600">info@aviandco.in</a> for any career related enquiries.</div>
         </div>
       </div>
 
@@ -820,7 +820,7 @@
             </select>
             <select class="fi" id="car-dob-day">
               <option value="">Day</option>
-              <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>for(let i=1;i<=31;i++) document.write('<option>'+i+'</option>');</script>
+              <script>for(let i=1;i<=31;i++) document.write('<option>'+i+'</option>');</script>
             </select>
             <select class="fi" id="car-dob-year">
               <option value="">Year</option>
@@ -1415,7 +1415,7 @@
   <!-- Removed local Cloudflare email-decode scripts (returned 404 locally).
        If you host behind Cloudflare, don't add these manually — Cloudflare injects them.
        To enable local email obfuscation, host the correct script with proper MIME type. -->
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
 /* ─── Page Nav ─── */
 const PGMAP = {
   home:'nl-home',about:'nl-about',
@@ -1556,11 +1556,16 @@ function handleCareerForm(btn) {
     formData.append('car-resume', file, file.name);
   }
 
-  fetch(endpoint, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } })
-    .then(resp => {
-      if (resp.ok) return resp.json().catch(() => ({}));
-      return resp.json().then(err => Promise.reject(err));
-    }).then(() => {
+  const isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+  const submitPromise = isLocal
+    ? new Promise(resolve => setTimeout(resolve, 800))
+    : fetch(endpoint, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } })
+        .then(resp => {
+          if (resp.ok) return resp.json().catch(() => ({}));
+          return resp.json().then(err => Promise.reject(err));
+        });
+
+  submitPromise.then(() => {
       document.getElementById('car-success').style.display = 'block';
       required.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       if (resumeInput) resumeInput.value = '';
@@ -1602,14 +1607,19 @@ function handleForm(btn) {
   // include the fields
   fields.forEach(id => formData.append(id, document.getElementById(id).value.trim()));
 
-  fetch(endpoint, {
-    method: 'POST',
-    body: formData,
-    headers: { 'Accept': 'application/json' }
-  }).then(resp => {
-    if (resp.ok) return resp.json().catch(() => ({}));
-    return resp.json().then(err => Promise.reject(err));
-  }).then(() => {
+  const isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+  const submitPromise = isLocal
+    ? new Promise(resolve => setTimeout(resolve, 800))
+    : fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      }).then(resp => {
+        if (resp.ok) return resp.json().catch(() => ({}));
+        return resp.json().then(err => Promise.reject(err));
+      });
+
+  submitPromise.then(() => {
     btn.innerHTML = '<i class="fas fa-check"></i> Message Sent Successfully!';
     btn.style.background = 'linear-gradient(135deg,#27AE60,#1e8449)';
     fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
